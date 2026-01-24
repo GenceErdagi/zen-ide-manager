@@ -1,0 +1,8 @@
+[package]
+name = "zjide-manager"
+version = "0.1.0"
+authors = ["GenceErdagi <gencerdagi.ht@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+zellij-tile = { path = "../zellij/zellij-tile" }
