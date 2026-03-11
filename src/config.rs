@@ -5,6 +5,7 @@ use std::collections::{BTreeMap, BTreeSet};
 #[derive(Debug, Clone)]
 pub struct PluginConfig {
     pub default_layout: Option<String>,
+    pub startup_layout: Option<String>,
     pub feature_to_bit: BTreeMap<String, u8>,
     pub state_bits: BTreeMap<String, u64>,
     pub bits_to_state: BTreeMap<u64, String>,
@@ -82,12 +83,18 @@ impl PluginConfig {
     /// Parse configuration from raw key-value pairs
     pub fn parse(raw: &BTreeMap<String, String>) -> Result<Self, String> {
         let mut default_layout = None;
+        let mut startup_layout = None;
         let mut layout_defs: Vec<(String, BTreeMap<String, bool>)> = Vec::new();
         let mut commands = BTreeMap::new();
 
         for (key, value) in raw {
             if key == "default_layout" {
                 default_layout = Some(value.trim().to_string());
+                continue;
+            }
+
+            if key == "startup_layout" {
+                startup_layout = Some(value.trim().to_string());
                 continue;
             }
 
@@ -157,6 +164,7 @@ impl PluginConfig {
 
         Ok(Self {
             default_layout,
+            startup_layout,
             feature_to_bit,
             state_bits,
             bits_to_state,

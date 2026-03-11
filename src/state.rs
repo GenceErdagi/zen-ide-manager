@@ -15,6 +15,7 @@ pub struct State {
     pub config: Option<PluginConfig>,
     pub tabs: BTreeMap<usize, TabState>,
     pub active_tab: Option<usize>,
+    pub startup_applied: bool,
 }
 
 impl Default for State {
@@ -23,6 +24,7 @@ impl Default for State {
             config: None,
             tabs: BTreeMap::new(),
             active_tab: None,
+            startup_applied: false,
         }
     }
 }
@@ -62,11 +64,31 @@ impl TabManager for State {
 impl State {
     /// Handle tab update events
     pub fn on_tab_update(&mut self, tabs: Vec<TabInfo>) {
-        if self.config.is_none() {
-            return;
-        }
+        let startup_layout = self
+            .config
+            .as_ref()
+            .and_then(|c| c.startup_layout.as_ref().cloned());
 
         self.update_tabs(tabs);
+
+        if !self.startup_applied {
+            if let Some(ref startup) = startup_layout {
+                let config = self.config.as_ref().unwrap(); // Safe because startup_layout was Some
+                if config.state_bits.contains_key(startup) {
+                    go_to_swap_layout(startup);
+                } else if config.state_bits.contains_key("BASE") {
+                    eprintln!(
+                        "zjide-manager: startup_layout '{startup}' not found, falling back to 'BASE'"
+                    );
+                    go_to_swap_layout("BASE");
+                } else {
+                    eprintln!(
+                        "zjide-manager: startup_layout '{startup}' and fallback 'BASE' not found"
+                    );
+                }
+            }
+            self.startup_applied = true;
+        }
     }
 
     /// Get the current bit pattern for the active tab
@@ -110,7 +132,7 @@ impl State {
             return;
         };
 
-        let (target_layout, resolved_bits) = if let Some(layout) =
+        let (target_layout, _resolved_bits) = if let Some(layout) =
             config.bits_to_state.get(&target_bits)
         {
             (layout.clone(), target_bits)

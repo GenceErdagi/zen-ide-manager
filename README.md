@@ -35,6 +35,8 @@ For demonstration purposes, example configuration files have been provided in th
 plugin location="file:/path/to/zjide-manager.wasm" {
     // Define the default starting layout
     default_layout "BASE"
+    // (Optional) Automatically switch to this layout on startup
+    startup_layout "no_terminal"
 
     // Map layouts to feature flags
     layout.BASE        "sidebar=true, terminal=true"
