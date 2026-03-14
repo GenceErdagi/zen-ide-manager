@@ -8,7 +8,7 @@ Instead of manually cycling through various swap layouts, this plugin allows use
 
 **This project is published strictly as a demonstration/proof-of-concept.**
 
-1.  **Custom Dependencies:** This plugin relies on a modified, custom version of Zellij and will not compile or function with the standard upstream crates. It specifically requires the features and bugfixes found in the [`working/integration-swap-layout-and-pipe-fix`](https://github.com/GenceErdagi/zellij/tree/working/integration-swap-layout-and-pipe-fix) branch. This fork is necessary until the main Zellij repository incorporates replacements for these new swap layout integrations and pipe bugfixes.
+1.  **Custom Dependencies:** This plugin relies on a modified, custom version of Zellij and will not compile or function with the standard upstream crates. It specifically requires the features found in the [`/go-to-swap-layout-and-pipe-fix`]('https://github.com/GenceErdagi/zellij/tree/go-to-swap-layout') branch. This fork is necessary until the main Zellij repository incorporates new method for swap layout to a given name.
 2.  **Environment Integration:** The original implementation is deeply integrated with a custom Nushell and Yazi setup, utilizing specific environment variables and IPC mechanisms that are not present in standard environments.
 
 ## Core Concept
