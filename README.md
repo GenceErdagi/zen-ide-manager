@@ -38,6 +38,12 @@ plugin location="file:/path/to/zjide-manager.wasm" {
     // (Optional) Automatically switch to this layout on startup
     startup_layout "no_terminal"
 
+    // Focus management
+    default_focus_pane "Editor"
+    pane_name.editor   "Editor"
+    pane_name.terminal "Terminal"
+    pane_name.sidebar  "File-Explorer"
+
     // Map layouts to feature flags
     layout.BASE        "sidebar=true, terminal=true"
     layout.no_sidebar  "sidebar=false, terminal=true"
@@ -48,6 +54,28 @@ plugin location="file:/path/to/zjide-manager.wasm" {
     trigger.toggle_sidebar  "toggle sidebar"
     trigger.toggle_terminal "toggle terminal"
     trigger.zen             "state zen"
+}
+```
+
+## Focus Management
+
+The plugin includes an intelligent focus management system that automatically shifts focus when layouts change:
+
+1.  **Priority Focus:** When a feature is newly enabled (e.g., toggling the terminal on), the plugin prioritizes focusing that new pane.
+    *   **Priority Order:** `terminal` > `sidebar` > other features.
+2.  **Default Focus:** If no new features are enabled (e.g., toggling a feature off or just switching states), the plugin falls back to focusing the `default_focus_pane`.
+3.  **Automatic Fallback:** If `default_focus_pane` is not explicitly set, it defaults to the value of `pane_name.editor`.
+
+### Dynamic Focus via Pipe
+
+You can manually trigger focus for any tracked pane using the `focus-pane` pipe message:
+
+```kdl
+bind "Alt f" {
+    MessagePlugin "zjide-manager" {
+        name "focus-pane"
+        payload "Editor"
+    }
 }
 ```
 

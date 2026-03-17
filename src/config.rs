@@ -6,8 +6,9 @@ use std::collections::{BTreeMap, BTreeSet};
 pub struct PluginConfig {
     pub default_layout: Option<String>,
     pub startup_layout: Option<String>,
-    pub editor_pane_name: Option<String>,
+    pub default_focus_pane: Option<String>,
     pub feature_to_bit: BTreeMap<String, u8>,
+    pub feature_to_pane: BTreeMap<String, String>,
     pub state_bits: BTreeMap<String, u64>,
     pub bits_to_state: BTreeMap<u64, String>,
     pub commands: CommandRegistry,
@@ -85,9 +86,10 @@ impl PluginConfig {
     pub fn parse(raw: &BTreeMap<String, String>) -> Result<Self, String> {
         let mut default_layout = None;
         let mut startup_layout = None;
-        let mut editor_pane_name = None;
+        let mut default_focus_pane = None;
         let mut layout_defs: Vec<(String, BTreeMap<String, bool>)> = Vec::new();
         let mut commands = BTreeMap::new();
+        let mut feature_to_pane = BTreeMap::new();
 
         for (key, value) in raw {
             if key == "default_layout" {
@@ -100,8 +102,17 @@ impl PluginConfig {
                 continue;
             }
 
-            if key == "editor_pane_name" {
-                editor_pane_name = Some(value.trim().to_string());
+            if key == "default_focus_pane" {
+                default_focus_pane = Some(value.trim().to_string());
+                continue;
+            }
+
+            if let Some(feature) = key.strip_prefix("pane_name.") {
+                let pane_name = value.trim().to_string();
+                if feature == "editor" && default_focus_pane.is_none() {
+                    default_focus_pane = Some(pane_name.clone());
+                }
+                feature_to_pane.insert(feature.to_string(), pane_name);
                 continue;
             }
 
@@ -172,8 +183,9 @@ impl PluginConfig {
         Ok(Self {
             default_layout,
             startup_layout,
-            editor_pane_name,
+            default_focus_pane,
             feature_to_bit,
+            feature_to_pane,
             state_bits,
             bits_to_state,
             commands: CommandRegistry::new(commands),

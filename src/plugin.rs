@@ -42,11 +42,14 @@ impl PluginLifecycle for State {
     }
 
     fn handle_pipe(&mut self, pipe_message: PipeMessage) -> bool {
-        if pipe_message.name == "focus-editor" {
-            self.focus_editor();
-            return false;
+        match pipe_message.name.as_str() {
+            "focus-pane" => {
+                if let Some(payload) = pipe_message.payload {
+                    self.focus_pane(&payload);
+                }
+            }
+            name => self.apply_command(name),
         }
-        self.apply_command(&pipe_message.name);
         false
     }
 

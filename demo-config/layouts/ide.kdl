@@ -19,7 +19,7 @@ layout {
                 focus true
             }
             pane split_direction="horizontal" {
-                pane command="hx" name="Helix"
+                pane command="hx" name="Editor"
                 pane name="Terminal" size="25%" // Terminal
             }
         }

@@ -16,7 +16,7 @@ pub struct State {
     pub tabs: BTreeMap<usize, TabState>,
     pub active_tab: Option<usize>,
     pub startup_applied: bool,
-    pub editor_pane_id: Option<PaneId>,
+    pub tracked_panes: BTreeMap<String, PaneId>,
 }
 
 impl Default for State {
@@ -26,7 +26,7 @@ impl Default for State {
             tabs: BTreeMap::new(),
             active_tab: None,
             startup_applied: false,
-            editor_pane_id: None,
+            tracked_panes: BTreeMap::new(),
         }
     }
 }
@@ -94,33 +94,24 @@ impl State {
     }
 
     pub fn on_pane_update(&mut self, manifest: PaneManifest) {
-        let editor_pane_name = self
-            .config
-            .as_ref()
-            .and_then(|c| c.editor_pane_name.as_ref());
+        self.tracked_panes.clear();
 
-        self.editor_pane_id = None;
-
-        if let Some(editor_pane_name) = editor_pane_name {
-            if let Some(active_tab) = self.active_tab {
-                if let Some(panes) = manifest.panes.get(&active_tab) {
-                    for pane in panes {
-                        if pane.title == *editor_pane_name {
-                            self.editor_pane_id = Some(match pane.is_plugin {
-                                true => PaneId::Plugin(pane.id),
-                                false => PaneId::Terminal(pane.id),
-                            });
-                            return;
-                        }
-                    }
+        if let Some(active_tab) = self.active_tab {
+            if let Some(panes) = manifest.panes.get(&active_tab) {
+                for pane in panes {
+                    let pane_id = match pane.is_plugin {
+                        true => PaneId::Plugin(pane.id),
+                        false => PaneId::Terminal(pane.id),
+                    };
+                    self.tracked_panes.insert(pane.title.clone(), pane_id);
                 }
             }
         }
     }
 
-    pub fn focus_editor(&self) {
-        if let Some(pane_id) = self.editor_pane_id {
-            focus_pane_with_id(pane_id, true, true);
+    pub fn focus_pane(&self, name: &str) {
+        if let Some(pane_id) = self.tracked_panes.get(name) {
+            focus_pane_with_id(*pane_id, true, true);
         }
     }
 
@@ -180,5 +171,50 @@ impl State {
         };
 
         go_to_swap_layout(&target_layout);
+
+        // Intelligent Focus Logic
+        let gained_bits = target_bits & !current_bits;
+        let mut focused = false;
+
+        // Priority: terminal > sidebar > others
+        for feature in &["terminal", "sidebar"] {
+            if let Some(bit_idx) = config.feature_to_bit.get(*feature) {
+                let bit = 1u64 << bit_idx;
+                if gained_bits & bit != 0 {
+                    if let Some(pane_name) = config.feature_to_pane.get(*feature) {
+                        if let Some(pane_id) = self.tracked_panes.get(pane_name) {
+                            focus_pane_with_id(*pane_id, true, true);
+                            focused = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if !focused {
+            // Check other gained features if any
+            for (feature_name, bit_idx) in &config.feature_to_bit {
+                if *feature_name == "terminal" || *feature_name == "sidebar" {
+                    continue;
+                }
+                let bit = 1u64 << bit_idx;
+                if gained_bits & bit != 0 {
+                    if let Some(pane_name) = config.feature_to_pane.get(feature_name) {
+                        if let Some(pane_id) = self.tracked_panes.get(pane_name) {
+                            focus_pane_with_id(*pane_id, true, true);
+                            focused = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if !focused {
+            if let Some(default_pane) = config.default_focus_pane.as_ref() {
+                self.focus_pane(default_pane);
+            }
+        }
     }
 }
