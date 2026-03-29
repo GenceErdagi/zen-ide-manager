@@ -17,7 +17,6 @@ pub struct State {
     pub config: Option<PluginConfig>,
     pub tabs: BTreeMap<usize, TabState>,
     pub active_tab: Option<usize>,
-    pub startup_applied: bool,
     pub tracked_panes: BTreeMap<String, PaneId>,
 }
 
@@ -27,7 +26,6 @@ impl Default for State {
             config: None,
             tabs: BTreeMap::new(),
             active_tab: None,
-            startup_applied: false,
             tracked_panes: BTreeMap::new(),
         }
     }
@@ -68,31 +66,7 @@ impl TabManager for State {
 impl State {
     /// Handle tab update events
     pub fn on_tab_update(&mut self, tabs: Vec<TabInfo>) {
-        let startup_layout = self
-            .config
-            .as_ref()
-            .and_then(|c| c.startup_layout.as_ref().cloned());
-
         self.update_tabs(tabs);
-
-        if !self.startup_applied {
-            if let Some(ref startup) = startup_layout {
-                let config = self.config.as_ref().unwrap(); // Safe because startup_layout was Some
-                if config.state_bits.contains_key(startup) {
-                    self.navigate_to_layout(startup);
-                } else if config.state_bits.contains_key("BASE") {
-                    eprintln!(
-                        "zjide-manager: startup_layout '{startup}' not found, falling back to 'BASE'"
-                    );
-                    self.navigate_to_layout("BASE");
-                } else {
-                    eprintln!(
-                        "zjide-manager: startup_layout '{startup}' and fallback 'BASE' not found"
-                    );
-                }
-            }
-            self.startup_applied = true;
-        }
     }
 
     pub fn on_pane_update(&mut self, manifest: PaneManifest) {
@@ -226,6 +200,7 @@ impl State {
         };
 
         let layout_order: Vec<&String> = config.state_bits.keys().collect();
+
         let Some(target_idx) = layout_order.iter().position(|l| *l == target_layout) else {
             eprintln!(
                 "zjide-manager: target layout '{}' not found in configuration",
