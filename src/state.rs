@@ -1,6 +1,8 @@
 use crate::config::{BitResolver, PluginConfig, StateResolver};
 use std::collections::BTreeMap;
-use zellij_tile::prelude::{focus_pane_with_id, go_to_swap_layout, PaneId, PaneManifest, TabInfo};
+use zellij_tile::prelude::{
+    focus_pane_with_id, next_swap_layout, previous_swap_layout, PaneId, PaneManifest, TabInfo,
+};
 
 /// Represents the state of a single tab
 #[derive(Default, Debug, Clone)]
@@ -77,12 +79,12 @@ impl State {
             if let Some(ref startup) = startup_layout {
                 let config = self.config.as_ref().unwrap(); // Safe because startup_layout was Some
                 if config.state_bits.contains_key(startup) {
-                    go_to_swap_layout(startup);
+                    self.navigate_to_layout(startup);
                 } else if config.state_bits.contains_key("BASE") {
                     eprintln!(
                         "zjide-manager: startup_layout '{startup}' not found, falling back to 'BASE'"
                     );
-                    go_to_swap_layout("BASE");
+                    self.navigate_to_layout("BASE");
                 } else {
                     eprintln!(
                         "zjide-manager: startup_layout '{startup}' and fallback 'BASE' not found"
@@ -170,7 +172,7 @@ impl State {
             return;
         };
 
-        go_to_swap_layout(&target_layout);
+        self.navigate_to_layout(&target_layout);
 
         // Intelligent Focus Logic
         let gained_bits = target_bits & !current_bits;
@@ -214,6 +216,69 @@ impl State {
         if !focused {
             if let Some(default_pane) = config.default_focus_pane.as_ref() {
                 self.focus_pane(default_pane);
+            }
+        }
+    }
+
+    fn navigate_to_layout(&self, target_layout: &str) {
+        let Some(config) = self.config.as_ref() else {
+            return;
+        };
+
+        let layout_order: Vec<&String> = config.state_bits.keys().collect();
+        let Some(target_idx) = layout_order.iter().position(|l| *l == target_layout) else {
+            eprintln!(
+                "zjide-manager: target layout '{}' not found in configuration",
+                target_layout
+            );
+            return;
+        };
+
+        let current_layout = self
+            .get_active_tab_state()
+            .and_then(|ts| ts.active_layout.as_deref());
+
+        let current_idx = if let Some(current) = current_layout {
+            layout_order.iter().position(|l| *l == current)
+        } else {
+            None
+        };
+
+        let Some(current_idx) = current_idx else {
+            eprintln!("zjide-manager: current layout unknown, cannot navigate with prev/next");
+            return;
+        };
+
+        let total_layouts = layout_order.len();
+        let distance = target_idx as i32 - current_idx as i32;
+
+        if distance == 0 {
+            return;
+        }
+
+        let use_next = if distance > 0 {
+            distance <= (total_layouts as i32 / 2)
+        } else {
+            -distance > (total_layouts as i32 / 2)
+        };
+
+        if use_next {
+            let steps = if distance > 0 {
+                distance as usize
+            } else {
+                (total_layouts as i32 + distance) as usize
+            };
+            for _ in 0..steps {
+                next_swap_layout();
+            }
+        } else {
+            let steps = if distance < 0 {
+                (-distance) as usize
+            } else {
+                (total_layouts as i32 - distance) as usize
+            };
+            for _ in 0..steps {
+                previous_swap_layout();
             }
         }
     }
