@@ -1,5 +1,5 @@
 [package]
-name = "zjide-manager"
+name = "zen-ide-manager"
 version = "0.2.0"
 authors = ["GenceErdagi <gencerdagi.ht@gmail.com>"]
 edition = "2021"

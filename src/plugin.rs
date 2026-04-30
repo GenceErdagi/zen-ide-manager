@@ -23,7 +23,7 @@ impl PluginLifecycle for State {
             Ok(config) => {
                 self.config = Some(config);
             }
-            Err(err) => eprintln!("zjide-manager: failed to parse configuration: {err}"),
+            Err(err) => eprintln!("zen-ide-manager: failed to parse configuration: {err}"),
         }
     }
 

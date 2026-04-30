@@ -94,7 +94,7 @@ impl State {
     /// Focus a pane, toggling its feature visibility if not currently enabled
     pub fn focus_or_toggle_pane(&mut self, pane_name: &str) {
         let Some(config) = self.config.as_ref() else {
-            eprintln!("zjide-manager: plugin not configured yet");
+            eprintln!("zen-ide-manager: plugin not configured yet");
             return;
         };
 
@@ -111,12 +111,12 @@ impl State {
 
         // Check current bits to see if the feature is enabled
         let Some(current_bits) = self.current_bits(config) else {
-            eprintln!("zjide-manager: unable to determine current layout bits");
+            eprintln!("zen-ide-manager: unable to determine current layout bits");
             return;
         };
 
         let Some(feature_bit) = config.bit_for_feature(&feature_name) else {
-            eprintln!("zjide-manager: unknown feature '{feature_name}'");
+            eprintln!("zen-ide-manager: unknown feature '{feature_name}'");
             return;
         };
 
@@ -133,12 +133,12 @@ impl State {
                 layout.clone()
             } else if let Some((layout, _)) = config.closest_state(target_bits) {
                 eprintln!(
-                    "zjide-manager: layout for mask {target_bits} missing, falling back to {layout}"
+                    "zen-ide-manager: layout for mask {target_bits} missing, falling back to {layout}"
                 );
                 layout
             } else {
                 eprintln!(
-                    "zjide-manager: no layouts available to satisfy feature '{feature_name}'"
+                    "zen-ide-manager: no layouts available to satisfy feature '{feature_name}'"
                 );
                 return;
             };
@@ -170,23 +170,23 @@ impl State {
     /// Apply a command by name
     pub fn apply_command(&mut self, command_name: &str) {
         let Some(config) = self.config.as_ref() else {
-            eprintln!("zjide-manager: plugin not configured yet");
+            eprintln!("zen-ide-manager: plugin not configured yet");
             return;
         };
 
         let Some(command) = config.commands.get(command_name) else {
-            eprintln!("zjide-manager: unknown trigger '{command_name}'");
+            eprintln!("zen-ide-manager: unknown trigger '{command_name}'");
             return;
         };
 
         let Some(current_bits) = self.current_bits(config) else {
-            eprintln!("zjide-manager: unable to determine current layout bits");
+            eprintln!("zen-ide-manager: unable to determine current layout bits");
             return;
         };
 
         let Some(target_bits) = config.resolve_target_bits(current_bits, command) else {
             eprintln!(
-                "zjide-manager: trigger '{command_name}' references an unknown feature/state"
+                "zen-ide-manager: trigger '{command_name}' references an unknown feature/state"
             );
             return;
         };
@@ -197,11 +197,11 @@ impl State {
             (layout.clone(), target_bits)
         } else if let Some((layout, bits)) = config.closest_state(target_bits) {
             eprintln!(
-                "zjide-manager: layout for mask {target_bits} missing, falling back to {layout}"
+                "zen-ide-manager: layout for mask {target_bits} missing, falling back to {layout}"
             );
             (layout, bits)
         } else {
-            eprintln!("zjide-manager: no layouts available to satisfy trigger '{command_name}'");
+            eprintln!("zen-ide-manager: no layouts available to satisfy trigger '{command_name}'");
             return;
         };
 
@@ -262,7 +262,7 @@ impl State {
 
         let Some(target_idx) = layout_order.iter().position(|l| *l == target_layout) else {
             eprintln!(
-                "zjide-manager: target layout '{}' not found in configuration",
+                "zen-ide-manager: target layout '{}' not found in configuration",
                 target_layout
             );
             return;
@@ -279,7 +279,7 @@ impl State {
         };
 
         let Some(current_idx) = current_idx else {
-            eprintln!("zjide-manager: current layout unknown, cannot navigate with prev/next");
+            eprintln!("zen-ide-manager: current layout unknown, cannot navigate with prev/next");
             return;
         };
 

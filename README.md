@@ -1,6 +1,6 @@
-# zjide-manager
+# zen-ide-manager
 
-`zjide-manager` is a Zellij plugin designed to provide IDE-like capabilities by managing workspace layouts through stateful feature toggles.
+`zen-ide-manager` is a Zellij plugin designed to provide IDE-like capabilities by managing workspace layouts through stateful feature toggles.
 
 Instead of manually cycling through various swap layouts, this plugin allows users to define specific "features" (such as a sidebar, terminal, or debug panel) and maps combinations of these active features to specific layouts. Toggling a feature on or off automatically transitions the workspace to the appropriate layout using the standard Zellij `previous_swap_layout` and `next_swap_layout` APIs.
 
@@ -24,7 +24,7 @@ For demonstration purposes, example configuration files have been provided in th
 ### Example Plugin Configuration
 
 ```kdl
-plugin location="file:/path/to/zjide-manager.wasm" {
+plugin location="file:/path/to/zen-ide-manager.wasm" {
     // Define the default starting layout
     default_layout "BASE"
 
@@ -62,7 +62,7 @@ You can manually trigger focus for any tracked pane using the `focus-pane` pipe 
 
 ```kdl
 bind "Alt f" {
-    MessagePlugin "zjide-manager" {
+    MessagePlugin "zen-ide-manager" {
         name "focus-pane"
         payload "Editor"
     }
@@ -81,7 +81,7 @@ This is useful for workflows like toggling sidebar from helix, or returning focu
 ```kdl
 // Toggle sidebar visibility and focus it from helix
 bind "Alt e" {
-    MessagePlugin "zjide-manager" {
+    MessagePlugin "zen-ide-manager" {
         name "focus-or-toggle-pane"
         payload "File-Explorer"
     }
@@ -91,13 +91,13 @@ bind "Alt e" {
 **From terminal (for use in helix/yazi commands):**
 ```bash
 # Toggle sidebar and focus it
-zellij pipe --plugin file:/path/to/zjide-manager.wasm --name focus-or-toggle-pane -- "File-Explorer"
+zellij pipe --plugin file:/path/to/zen-ide-manager.wasm --name focus-or-toggle-pane -- "File-Explorer"
 
 # Focus terminal (toggle if hidden)
-zellij pipe --plugin file:/path/to/zjide-manager.wasm --name focus-or-toggle-pane -- "Terminal"
+zellij pipe --plugin file:/path/to/zen-ide-manager.wasm --name focus-or-toggle-pane -- "Terminal"
 
 # Return to editor from yazi (just focus, no toggle needed)
-zellij pipe --plugin file:/path/to/zjide-manager.wasm --name focus-pane -- "Editor"
+zellij pipe --plugin file:/path/to/zen-ide-manager.wasm --name focus-pane -- "Editor"
 ```
 
 ### Keybindings
@@ -107,14 +107,14 @@ Keybindings send messages to the plugin to trigger state changes:
 ```kdl
 // Traditional toggle (changes layout, focuses only if newly enabled)
 bind "Alt e" {
-    MessagePlugin "zjide-manager" {
+    MessagePlugin "zen-ide-manager" {
         name "toggle_sidebar"
     }
 }
 
 // Smart toggle+focus (focuses if visible, shows then focuses if hidden)
 bind "Alt e" {
-    MessagePlugin "zjide-manager" {
+    MessagePlugin "zen-ide-manager" {
         name "focus-or-toggle-pane"
         payload "File-Explorer"
     }
@@ -134,7 +134,7 @@ cargo build --target wasm32-wasip1
 cargo build --release --target wasm32-wasip1
 ```
 
-The wasm file will be at `target/wasm32-wasip1/debug/zjide-manager.wasm` or `target/wasm32-wasip1/release/zjide-manager.wasm`.
+The wasm file will be at `target/wasm32-wasip1/debug/zen-ide-manager.wasm` or `target/wasm32-wasip1/release/zen-ide-manager.wasm`.
 
 ## Testing / Demo
 
@@ -161,15 +161,15 @@ Releases are automatically built and published to GitHub Releases:
 cargo build --release --target wasm32-wasip1
 
 # The wasm is at:
-# target/wasm32-wasip1/release/zjide-manager.wasm
+# target/wasm32-wasip1/release/zen-ide-manager.wasm
 ```
 
-Download pre-built releases from: https://github.com/GenceErdagi/zjide-manager/releases
+Download pre-built releases from: https://github.com/GenceErdagi/zen-ide-manager/releases
 
 **Using released version:**
 ```kdl
 plugins {
-    zjide-manager location="https://github.com/GenceErdagi/zjide-manager/releases/download/v0.2.0/zjide-manager.wasm" {
+    zen-ide-manager location="https://github.com/GenceErdagi/zen-ide-manager/releases/download/v0.2.0/zen-ide-manager.wasm" {
         default_layout "BASE"
         pane_name.editor   "Editor"
         pane_name.terminal "Terminal"

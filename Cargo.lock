@@ -2447,6 +2447,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "zen-ide-manager"
+version = "0.2.0"
+dependencies = [
+ "zellij-tile",
+]
+
+[[package]]
 name = "zerocopy"
 version = "0.8.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2464,11 +2471,4 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.114",
-]
-
-[[package]]
-name = "zjide-manager"
-version = "0.1.0"
-dependencies = [
- "zellij-tile",
 ]

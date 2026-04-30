@@ -1,12 +1,12 @@
 keybinds clear=true {
     bind "Alt e" {
-        MessagePlugin "zjide-manager" {
+        MessagePlugin "zen-ide-manager" {
             name "toggle_sidebar"
             floating false
         }
     }
     bind "Alt r" {
-        MessagePlugin "zjide-manager" {
+        MessagePlugin "zen-ide-manager" {
             name "toggle_terminal"
             floating false
         }

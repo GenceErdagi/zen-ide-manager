@@ -13,7 +13,7 @@ template:
     - direction: Vertical
       run:
         plugin:
-          location: "file:target/wasm32-wasip1/debug/zjide-manager.wasm"
+          location: "file:target/wasm32-wasip1/debug/zen-ide-manager.wasm"
     - direction: Vertical
       borderless: true
       split_size:
